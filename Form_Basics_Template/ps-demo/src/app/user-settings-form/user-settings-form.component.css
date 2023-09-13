@@ -14,3 +14,8 @@
     margin-top: 1%;
     margin-bottom: 1%;
 }
+
+.field-error
+{
+    border: 1px solid red;
+}
