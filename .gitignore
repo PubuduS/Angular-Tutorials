@@ -3,6 +3,9 @@
 # Ignore commit message
 message.txt
 
+# Ignore commit bash script
+commit.sh
+
 # Compiled output
 /dist
 /tmp
