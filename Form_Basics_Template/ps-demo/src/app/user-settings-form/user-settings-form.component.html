@@ -51,11 +51,10 @@
         <div class="form-group">
 
             <label for="subscriptionType"> Subscription Type </label>
-            <select class="form-select" aria-label="Default select example" id="subscriptionType" name="subscriptionType" [(ngModel)]="userSettings.subscriptionType">
-                <option selected>Open this select menu</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Annual">Annual</option>
-                <option value="Lifetime">Lifetime</option>
+            <select class="form-select" aria-label="Default select example" id="subscriptionType" name="subscriptionType" [(ngModel)]="userSettings.subscriptionType">                
+                <option *ngFor="let type of subscriptionTypes | async">
+                    {{ type }}
+                </option>
             </select>
         </div>
 
@@ -64,6 +63,9 @@
             <textarea class="form-control" id="notes" name="notes" rows="3" [(ngModel)]="userSettings.notes"></textarea>
         </div>
 
+        <div [hidden]="!postError" class="alert alert-danger">
+            
+        </div>
         <button class="btn btn-primary">Send</button>
     </form>
 </div>
