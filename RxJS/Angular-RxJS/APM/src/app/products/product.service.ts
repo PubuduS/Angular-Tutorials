@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { catchError, Observable, tap, throwError, map, combineLatest, find } from 'rxjs';
+import { catchError, Observable, Subject, tap, merge, scan, throwError, map, combineLatest, find, BehaviorSubject } from 'rxjs';
 
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
@@ -35,9 +35,44 @@ export class ProductService {
         )
       )
    );
+
+   private productSelectedSubject = new BehaviorSubject<number>(0);
+   productSelectedAction$ = this.productSelectedSubject.asObservable();
+
+   selectedProduct$ = combineLatest([
+      this.productWithCategory$,
+      this.productSelectedAction$
+   ]).pipe(
+      map( ([products, selectedProductId]) =>
+        products.find( product => product.id === selectedProductId )
+      ),
+      tap( product => console.log('selectedProduct', product))
+   );
+
+   private productInsertedSubject = new Subject<Product>();
+   productInsertedAction$ = this.productInsertedSubject.asObservable();
+
+   productsWithAdd$ = merge(
+      this.productWithCategory$,
+      this.productInsertedAction$
+   ).pipe(
+      scan( (acc, value) =>  
+      ( value instanceof Array) ? [...value] : [...acc, value], [] as Product[] )
+   );
   
   constructor( private http: HttpClient,
                private productCategoryService: ProductCategoryService ) { }
+
+  selectedProductChanged( selectedProductId: number ) : void
+  {
+    this.productSelectedSubject.next( selectedProductId );
+  }
+
+  addProduct( newProduct?: Product )
+  {
+    newProduct = newProduct || this.fakeProduct();
+    this.productInsertedSubject.next( newProduct );
+  }
 
   private fakeProduct(): Product {
     return {
@@ -47,7 +82,7 @@ export class ProductService {
       description: 'Our new product',
       price: 8.9,
       categoryId: 3,
-      // category: 'Toolbox',
+      category: 'Toolbox',
       quantityInStock: 30
     };
   }
