@@ -1,27 +1,25 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
-import { NgModel } from '@angular/forms';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 
 import { IProduct } from './product';
 import { ProductService } from './product.service';
+import { CriteriaComponent } from '../shared/criteria.component';
 
 @Component({
     templateUrl: './product-list.component.html',
     styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, AfterViewInit {
     pageTitle: string = 'Product List';
     showImage: boolean;
-    listFilter: string;
+    includeDetail: boolean = true;
+
+    // Here we are referencing child component.
+    @ViewChild(CriteriaComponent) filterComponent: CriteriaComponent;
+    parentListFilter: string;
 
     imageWidth: number = 50;
     imageMargin: number = 2;
     errorMessage: string;
-
-    // The goal is to access native html property.
-    // To get an access we need to mark the html element with an id with #id format.
-    // We added #filterElement to html Input element in template and through that get access
-    @ViewChild('filterElement') filterElementRef : ElementRef;
-    @ViewChild(NgModel) filterInput: NgModel;
 
     filteredProducts: IProduct[];
     products: IProduct[];
@@ -30,34 +28,20 @@ export class ProductListComponent implements OnInit {
     {        
     }
 
-    // We can't access filter element from constructor because at that time componenet is not
-    // rendered yet. Therefore we need special lifecycle hook.
-    // this method will run after the view is rendered.
-    ngAfterViewInit(): void
-    {
-        // Through native element, we can access html properties such as focus.
-        // Native element can pose security risks. eg: cross site scripting attacks.
-        // Native element is tightly coupled to the browser.
-        // This can also bypass the data sanitation mechanism build into angular.
-        // Use as a last resort.
-        if( this.filterElementRef.nativeElement )
-        {
-            this.filterElementRef.nativeElement.focus();
-        }
-
-        this.filterInput.valueChanges.subscribe(
-            () => this.performFilter( this.listFilter )
-        );
-    }
-
     ngOnInit(): void {
         this.productService.getProducts().subscribe(
             (products: IProduct[]) => {
                 this.products = products;
-                this.performFilter(this.listFilter);
+                this.performFilter(this.parentListFilter);
             },
             (error: any) => this.errorMessage = <any>error
         );
+    }
+
+    ngAfterViewInit(): void 
+    {
+        // Here we get the child listFilter property through the referece
+        this.parentListFilter = this.filterComponent.listFilter;
     }
 
     toggleImage(): void {
