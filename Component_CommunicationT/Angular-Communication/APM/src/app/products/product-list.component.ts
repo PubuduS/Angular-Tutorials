@@ -38,6 +38,13 @@ export class ProductListComponent implements OnInit, AfterViewInit {
         );
     }
 
+    // This method is bound by event in template.
+    // When the template received a payload it will be passed to param.
+    onValueChange( value: string ): void 
+    {
+        this.performFilter( value );
+    }
+
     ngAfterViewInit(): void 
     {
         // Here we get the child listFilter property through the referece

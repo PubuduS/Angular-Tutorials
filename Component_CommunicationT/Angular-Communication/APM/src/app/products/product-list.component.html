@@ -7,9 +7,9 @@
         <!-- Filter by the Title   -->
         <div class='row'>
             <pm-criteria #filterCriteria class='col-md-10' [displayDetail]='includeDetail'
-            [hitCount]='filteredProducts?.length'>                
-            </pm-criteria>
-            {{filterCriteria.listFilter}}
+            [hitCount]='filteredProducts?.length'
+            (valueChange)='onValueChange($event)'>                
+            </pm-criteria>            
         </div>
 
         <div class='table-responsive'>

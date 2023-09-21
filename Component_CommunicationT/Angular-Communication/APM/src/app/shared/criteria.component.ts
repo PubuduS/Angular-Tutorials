@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnChanges, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnChanges, Input, Output, SimpleChanges, EventEmitter } from '@angular/core';
 
 @Component({
     selector: 'pm-criteria',
@@ -7,8 +7,6 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnChanges, Inp
 })
 export class CriteriaComponent implements OnInit, OnChanges, AfterViewInit {
     
-    listFilter: string = 'cart';
-
     // Input decorator allows parent component to pass values to child.
     // In our parent component template (product-list), we bind this(displayDetail) to
     // parent component property.
@@ -17,11 +15,35 @@ export class CriteriaComponent implements OnInit, OnChanges, AfterViewInit {
     @Input() hitCount: number;
 
     hitMessage: string;
+
+    // We are creating a event emitter to notify listFilter changes to parent.
+    // As it's payload it will transmit the listFilter to its parent.
+    @Output() valueChange: EventEmitter<string> = 
+                           new EventEmitter<string>();
     
     // The goal is to access native html property.
     // To get an access we need to mark the html element with an id with #id format.
     // We added #filterElement to html Input element in template and through that get access
     @ViewChild('filterElement') filterElementRef : ElementRef;
+
+    // Here we add a getter and setter to alert criteria compoenet 
+    // about the changes of criteria template.
+    private _listFilter: string;
+
+    get listFilter(): string
+    {
+        return this._listFilter;
+    }
+
+    // listFilter use 2 way binding
+    // Everytime, it changes in the template,
+    // it set the component property and emit 
+    // the value as payload to parent component. 
+    set listFilter( value: string )
+    {
+        this._listFilter = value;
+        this.valueChange.emit( value );
+    }
 
     constructor()
     {
