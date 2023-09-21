@@ -1,20 +1,18 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 
 import { IProduct } from './product';
 import { ProductService } from './product.service';
 import { CriteriaComponent } from '../shared/criteria.component';
+import { ProductParameterService } from './product-parameter.service';
 
 @Component({
     templateUrl: './product-list.component.html',
     styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit, AfterViewInit {
+export class ProductListComponent implements OnInit {
     pageTitle: string = 'Product List';
-    showImage: boolean;
     includeDetail: boolean = true;
 
-    // Here we are referencing child component.
-    @ViewChild(CriteriaComponent) filterComponent: CriteriaComponent;
     parentListFilter: string;
 
     imageWidth: number = 50;
@@ -24,7 +22,22 @@ export class ProductListComponent implements OnInit, AfterViewInit {
     filteredProducts: IProduct[];
     products: IProduct[];
 
-    constructor(private productService: ProductService) 
+    // Here we are referencing child component.
+    @ViewChild(CriteriaComponent) filterComponent: CriteriaComponent;
+
+
+    get showImage(): boolean
+    {
+        return this.productParameterService.showImage;
+    }
+
+    set showImage( value: boolean )
+    {
+        this.productParameterService.showImage = value;
+    }
+
+    constructor( private productService: ProductService,
+                 private productParameterService: ProductParameterService )
     {        
     }
 
@@ -32,7 +45,7 @@ export class ProductListComponent implements OnInit, AfterViewInit {
         this.productService.getProducts().subscribe(
             (products: IProduct[]) => {
                 this.products = products;
-                this.performFilter(this.parentListFilter);
+                this.filterComponent.listFilter = this.productParameterService.filterBy;                
             },
             (error: any) => this.errorMessage = <any>error
         );
@@ -42,13 +55,8 @@ export class ProductListComponent implements OnInit, AfterViewInit {
     // When the template received a payload it will be passed to param.
     onValueChange( value: string ): void 
     {
+        this.productParameterService.filterBy = value;
         this.performFilter( value );
-    }
-
-    ngAfterViewInit(): void 
-    {
-        // Here we get the child listFilter property through the referece
-        this.parentListFilter = this.filterComponent.listFilter;
     }
 
     toggleImage(): void {
