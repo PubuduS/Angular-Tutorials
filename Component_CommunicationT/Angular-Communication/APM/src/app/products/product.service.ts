@@ -6,6 +6,7 @@ import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { of } from 'rxjs/observable/of';
 
 import { catchError, tap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 import { IProduct } from './product';
 
@@ -13,9 +14,20 @@ import { IProduct } from './product';
 export class ProductService {
     private productsUrl = 'api/products';
     private products: IProduct[];
-    currentProduct: IProduct | null;
+
+    // Use multicast to announce changes to multiple subscribers.
+    private selectedProductSource = new BehaviorSubject<IProduct | null >( null );
+
+    // Expose the above private property as a public read only observable stream
+    selectedProductChanges$ = this.selectedProductSource.asObservable();
 
     constructor(private http: HttpClient) { }
+
+    // Everytime a change happened, we add that to observable stream
+    changeSelectedProduct( selectedProduct: IProduct | null  ): void
+    {
+        this.selectedProductSource.next( selectedProduct );
+    }
 
     getProducts(): Observable<IProduct[]> 
     {
@@ -80,7 +92,7 @@ export class ProductService {
                                 if( foundIndex > -1 )
                                 {
                                     this.products.splice( foundIndex, 1 );
-                                    this.currentProduct = null;
+                                    this.changeSelectedProduct( null );
                                 }
 
                             } ),
@@ -98,7 +110,7 @@ export class ProductService {
                             tap(data => console.log('createProduct: ' + JSON.stringify(data))),
                             tap( data => {
                                 this.products.push( data ),
-                                this.currentProduct = data; 
+                                this.changeSelectedProduct( data );
                             }),
                             catchError(this.handleError)
                         );
