@@ -6,7 +6,8 @@ import { Store } from '@ngrx/store';
 
 import { Product } from '../product';
 import { ProductService } from '../product.service';
-import { State, getShowProductCode } from '../state/product.reducer';
+import { State, getCurrentProduct, getShowProductCode } from '../state/product.reducer';
+import * as ProductAction from '../state/product.actions';
 
 @Component({
   selector: 'pm-product-list',
@@ -29,7 +30,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
     private productService: ProductService) { }
 
   ngOnInit(): void {
-    this.sub = this.productService.selectedProductChanges$.subscribe(
+
+    // this.sub = this.productService.selectedProductChanges$.subscribe(
+    //   currentProduct => this.selectedProduct = currentProduct
+    // );
+
+    // ToDo: Unsubscribe
+    // Previous function commented out in above use service.
+    // This new function use store to communicate multiple components.
+    this.sub = this.store.select(getCurrentProduct).subscribe(
       currentProduct => this.selectedProduct = currentProduct
     );
 
@@ -49,17 +58,18 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   checkChanged(): void {
-    this.store.dispatch( 
-      { type: '[Product] Toggle Product Code' }
-     );
+    this.store.dispatch( ProductAction.toggleProductCode() );
   }
 
   newProduct(): void {
-    this.productService.changeSelectedProduct(this.productService.newProduct());
+    this.store.dispatch( ProductAction.initializeCurrentProduct() );
   }
 
-  productSelected(product: Product): void {
-    this.productService.changeSelectedProduct(product);
+  productSelected(product: Product): void 
+  {    
+    // {product} is a short-hand operator. This is same as {product: product}
+    // left is param and right is function args here -> props< { product: Product } >()
+    this.store.dispatch( ProductAction.setCurrentProduct( {product} ) );
   }
 
 }

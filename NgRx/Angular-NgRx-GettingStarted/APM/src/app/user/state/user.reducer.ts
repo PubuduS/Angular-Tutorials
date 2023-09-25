@@ -33,6 +33,6 @@ export const userReducer = createReducer<UserState>(
         return {
             ...state,            
             maskUserName: !state.maskUserName
-        }
+        };
     })
 );
