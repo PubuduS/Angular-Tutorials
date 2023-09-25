@@ -1,12 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { Store } from '@ngrx/store';
 
 import { Product } from '../product';
-import { ProductService } from '../product.service';
-import { State, getCurrentProduct, getShowProductCode } from '../state/product.reducer';
+import { State, getCurrentProduct, getError, getProducts, getShowProductCode } from '../state/product.reducer';
 import * as ProductAction from '../state/product.actions';
 
 @Component({
@@ -16,18 +15,19 @@ import * as ProductAction from '../state/product.actions';
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   pageTitle = 'Products';
-  errorMessage: string;
 
   displayCode: boolean;
 
-  products: Product[];
+  products$: Observable<Product[]>;
 
-  // Used to highlight the selected product in the list
-  selectedProduct: Product | null;
   sub: Subscription;
+  selectedProduct$: Observable<Product>;
+  displayCode$: Observable<boolean>;
+  errorMessage$: Observable<string>;
 
-  constructor( private store: Store<State>,
-    private productService: ProductService) { }
+  constructor( private store: Store<State>)
+  { 
+  }
 
   ngOnInit(): void {
 
@@ -35,22 +35,19 @@ export class ProductListComponent implements OnInit, OnDestroy {
     //   currentProduct => this.selectedProduct = currentProduct
     // );
 
-    // ToDo: Unsubscribe
-    // Previous function commented out in above use service.
+
+     // Previous function commented out in above use service.
     // This new function use store to communicate multiple components.
-    this.sub = this.store.select(getCurrentProduct).subscribe(
-      currentProduct => this.selectedProduct = currentProduct
-    );
+    this.products$ = this.store.select(getProducts);
 
-    this.productService.getProducts().subscribe({
-      next: (products: Product[]) => this.products = products,
-      error: err => this.errorMessage = err
-    });
+    this.errorMessage$ = this.store.select( getError );
 
-    // ToDo: Unsubscribe
-    this.store.select(getShowProductCode).subscribe(
-      showProductCode => this.displayCode = showProductCode
-    );
+    this.store.dispatch( ProductAction.loadProducts() );
+
+    this.selectedProduct$ = this.store.select(getCurrentProduct);
+
+
+    this.displayCode$ = this.store.select(getShowProductCode);
   }
 
   ngOnDestroy(): void {

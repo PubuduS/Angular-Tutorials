@@ -18,7 +18,7 @@ export const initializeCurrentProduct = createAction(
     '[Product] Initialize Current Product'
 );
 
-export const loadProduct = createAction(
+export const loadProducts = createAction(
     '[Product] Load'
 );
 
