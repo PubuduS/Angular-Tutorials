@@ -12,7 +12,7 @@ export interface State extends AppState.State {
 
 export interface ProductState {
     showProductCode: boolean;
-    currentProduct: Product;
+    currentProductId: number | null;
     products: Product[];
     error: string;
 }
@@ -20,7 +20,7 @@ export interface ProductState {
 const initialState: ProductState =
 {
     showProductCode: true,
-    currentProduct: null,
+    currentProductId: null,
     products: [],
     error: ''
 }
@@ -32,9 +32,31 @@ export const getShowProductCode = createSelector(
     state => state.showProductCode
 );
 
+export const getCurrentProductId = createSelector(
+    getProductFeatureState,
+    state => state.currentProductId
+);
+
 export const getCurrentProduct = createSelector(
     getProductFeatureState,
-    state => state.currentProduct
+    getCurrentProductId,
+    (state, currentProductId) => 
+    {
+        if( currentProductId === 0 )
+        {
+            return{
+                id: 0,
+                productName: '',
+                productCode: 'New',
+                description: '',
+                starRating: 0
+            };
+        }
+        else
+        {
+            return currentProductId ? state.products.find( p => p.id === currentProductId ) : null;
+        }
+    }
 );
 
 export const getProducts = createSelector(
@@ -60,27 +82,21 @@ export const productReducer = createReducer<ProductState>(
     on(ProductAction.setCurrentProduct, (state, action): ProductState => {
         return {
             ...state,
-            currentProduct: action.product
+            currentProductId: action.currentProductId
         };
     }),
 
     on(ProductAction.clearCurrentProduct, (state): ProductState => {
         return {
             ...state,
-            currentProduct: null
+            currentProductId: null
         };
     }),
 
     on(ProductAction.initializeCurrentProduct, (state): ProductState => {
         return {
             ...state,
-            currentProduct: {
-                id: 0,
-                productName: '',
-                productCode: 'New',
-                description: '',
-                starRating: 0
-            }
+            currentProductId: 0
         };
     }),
 
@@ -96,6 +112,35 @@ export const productReducer = createReducer<ProductState>(
         return {
             ...state,
             products: [],
+            error: action.error
+        };
+    }),
+
+    on(ProductAction.updateProductSuccess, (state, action): ProductState => {
+
+        // Here we create a new array UpdatedProduct.
+        // We copy the old items + updated new item resulting a immutable array
+        const UpdatedProducts = state.products.map(
+            item => action.product.id === item.id ? action.product : item
+        );
+
+        // Here we copy the old state
+        // Replace products with newly updated products.
+        // Replace productId
+        // Clear any remaining previous errors.
+        return {
+            ...state,
+            products: UpdatedProducts,
+            currentProductId: action.product.id,
+            error: ''
+        };
+    }),
+
+    // Copy the state
+    // Update the error message.
+    on(ProductAction.updateProductFailure, (state, action): ProductState => {
+        return {
+            ...state,
             error: action.error
         };
     })

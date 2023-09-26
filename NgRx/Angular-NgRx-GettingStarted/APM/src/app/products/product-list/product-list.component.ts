@@ -66,7 +66,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   {    
     // {product} is a short-hand operator. This is same as {product: product}
     // left is param and right is function args here -> props< { product: Product } >()
-    this.store.dispatch( ProductAction.setCurrentProduct( {product} ) );
+    this.store.dispatch( ProductAction.setCurrentProduct( {currentProductId: product.id} ) );
   }
 
 }
