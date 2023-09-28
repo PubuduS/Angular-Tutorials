@@ -13,6 +13,6 @@ export interface Product {
 }
 
 export interface ProductResolved {
-  product: Product;
-  error?: any;
+  product: Product | null;
+  error?: string;
 }
