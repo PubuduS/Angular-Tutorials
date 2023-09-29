@@ -15,12 +15,21 @@ export class LoginComponent {
               private router: Router) { }
 
   login(loginForm: NgForm): void {
+    
     if (loginForm && loginForm.valid) {
       const userName = loginForm.form.value.userName;
       const password = loginForm.form.value.password;
       this.authService.login(userName, password);
 
-      this.router.navigate(['/products']);
+      if( this.authService.redirectUrl )
+      { 
+        this.router.navigateByUrl( this.authService.redirectUrl );
+      }
+      else
+      {
+        this.router.navigate(['/products']);
+      }
+      
 
       // Navigate to the Product List page after log in.
     } else {
