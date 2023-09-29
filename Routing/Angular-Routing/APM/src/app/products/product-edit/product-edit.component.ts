@@ -75,11 +75,12 @@ export class ProductEditComponent implements OnInit {
     this.validate();
 
     if( path )
-    {
+    {      
       return this.dataIsValid[path];
     }
-
-    return ( this.dataIsValid && Object.keys(this.dataIsValid).every( d => this.dataIsValid[d] === true ) );
+    
+    return (this.dataIsValid &&
+      Object.keys(this.dataIsValid).every(d => this.dataIsValid[d] === true));
   }
 
   saveProduct(): void {
