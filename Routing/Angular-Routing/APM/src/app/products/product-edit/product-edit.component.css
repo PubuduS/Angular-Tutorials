@@ -73,3 +73,8 @@
 .wizard .active:after {
     border-left-color: #007ACC;
 }
+
+.btn
+{
+    margin: 2%;
+}
